@@ -1,0 +1,12 @@
+{
+  "name": "@4uruanna/di",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./source/mod.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.19",
+    "@std/expect": "jsr:@std/expect@^1.0.19"
+  }
+}
