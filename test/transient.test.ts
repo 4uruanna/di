@@ -13,8 +13,8 @@ class FooClass {
 }
 
 Deno.test("inject scope", () => {
-  const instanceA = inject(FooClass, { type:"transient", args: ["thirdA"] });
-  const instanceB = inject(FooClass, { type:"transient", args: ["thirdB"] });
+  const instanceA = inject(FooClass, { type: "transient", args: ["thirdA"] });
+  const instanceB = inject(FooClass, { type: "transient", args: ["thirdB"] });
 
   expect(instanceA === instanceB).toBe(false);
   expect(instanceA.first).toBe("first");

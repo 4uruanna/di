@@ -2,6 +2,12 @@
 
 import { container } from "./mod.ts";
 
-export function free(scope: string): void {
-  container.free(scope);
+/**
+ * Releases all cached instances for a specific scope in the global container.
+ *
+ * @param {string} scope - The name of the key to free.
+ * @returns {void}
+ */
+export function free(key: string): void {
+  container.free(key);
 }

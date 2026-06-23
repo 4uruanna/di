@@ -1,5 +1,6 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
+import { MissingFactoryError } from "./error/MissingFactoryError.ts";
 import type {
   Dependency,
   Factory,
@@ -9,6 +10,10 @@ import type {
   UnknownFactory,
 } from "./mod.ts";
 
+/**
+ * A dependency injection container that manages instance creation and lifecycle.
+ * Supports 'singleton', 'scope' and 'transient'.
+ */
 export class DependencyContainer {
   private readonly _factoryMap = new Map<
     UnknownFactory,
@@ -22,23 +27,30 @@ export class DependencyContainer {
 
   private readonly _scopeMap = new Map<
     string,
-    Map<
-      UnknownFactory,
-      UnknownDependency
-    >
+    Map<UnknownFactory, UnknownDependency>
   >();
 
+  /**
+   * Retrieves a dependency instance based on the provided injection options.
+   *
+   * @template T - The dependency type to retrieve.
+   * @param {Factory<T>} factory - The constructor function for the factory.
+   * @param {InjectionOptions} options - The injection options containing type, args, and scope.
+   * @returns {Dependency<T>} The resolved dependency instance.
+   * @throws {MissingFactoryError} If factory is missing.
+   * @throws {Error} If scope is missing for scope-type injection.
+   */
   public get<T>(
-    dependency: Factory<T>,
+    constructor: Factory<T>,
     options: InjectionOptions,
   ): Dependency<T> {
     if (options.type === "singleton") {
-      if (this._singletonMap.has(dependency) === false) {
-        const factory = this._getFactory(dependency);
-        this._singletonMap.set(dependency, factory(...(options.args || [])));
+      if (this._singletonMap.has(constructor) === false) {
+        const factory = this._getFactory(constructor);
+        this._singletonMap.set(constructor, factory(...(options.args || [])));
       }
 
-      return this._singletonMap.get(dependency) as T;
+      return this._singletonMap.get(constructor) as T;
     } else if (options.type === "scope") {
       if (options.scope) {
         if (this._scopeMap.has(options.scope) === false) {
@@ -53,22 +65,30 @@ export class DependencyContainer {
 
         const map = this._scopeMap.get(options.scope)!;
 
-        if (map.has(dependency) === false) {
-          const factory = this._getFactory(dependency);
-          map.set(dependency, factory(...(options.args || [])));
+        if (map.has(constructor) === false) {
+          const factory = this._getFactory(constructor);
+          map.set(constructor, factory(...(options.args || [])));
         }
 
-        return map.get(dependency) as T;
+        return map.get(constructor) as T;
       } else {
         // THROW MISSING SCOPE ERROR
         throw new Error();
       }
     } else {
-      const factory = this._getFactory(dependency);
+      const factory = this._getFactory(constructor);
       return factory(...(options.args || []));
     }
   }
 
+  /**
+   * Registers a dependency factory with optional pre-bound arguments.
+   *
+   * @template T - The constructor type extending UnknownFactory.
+   * @param {T} constructor - The constructor function to register.
+   * @param {...unknown[]} args - Optional arguments to pre-bind to the constructor.
+   * @returns {void}
+   */
   public set<T extends UnknownFactory>(constructor: T, ...args: unknown[]) {
     const bound = constructor.bind(null, ...args);
 
@@ -78,23 +98,40 @@ export class DependencyContainer {
     );
   }
 
-  public free(scope: string) {
-    if (this._scopeMap.has(scope)) {
-      this._scopeMap.delete(scope);
+  /**
+   * Releases all cached instances for a specific scope.
+   *
+   * @param {string} key - The scope key to free.
+   * @returns {void}
+   */
+  public free(key: string) {
+    if (this._scopeMap.has(key)) {
+      this._scopeMap.delete(key);
     }
   }
 
-  private _getFactory<T>(dependency: Factory<T>) {
-    if (this._factoryMap.has(dependency)) {
-      const factory = this._factoryMap.get(dependency)!;
+  /**
+   * Retrieves the registered factory function for a dependency.
+   *
+   * @template T - The dependency type.
+   * @param {Factory<T>} factory - The constructor function to look up.
+   * @returns {UnknownDependencyFactory} The factory function for creating instances.
+   * @throws {MissingFactoryError} If no factory is registered for the dependency.
+   * @private
+   */
+  private _getFactory<T>(constructor: Factory<T>) {
+    if (this._factoryMap.has(constructor)) {
+      const factory = this._factoryMap.get(constructor)!;
       return factory as (
         ...args: unknown[]
       ) => InstanceType<Factory<T>>;
     } else {
-      // THROW MISSING FACTORY ERROR
-      throw new Error();
+      throw new MissingFactoryError(constructor);
     }
   }
 }
 
+/**
+ * The default global dependency injection container instance.
+ */
 export const container: DependencyContainer = new DependencyContainer();
