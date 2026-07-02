@@ -63,7 +63,7 @@ export class DependencyContainer {
    * @param {...unknown[]} args - Optional arguments to pre-bind to the constructor.
    * @returns {void}
    */
-  public set<T extends UnknownFactory>(constructor: T, ...args: unknown[]) {
+  public set<T extends UnknownFactory>(constructor: T, ...args: unknown[]): void {
     const bound = constructor.bind(null, ...args);
 
     this._factoryMap.set(
@@ -73,14 +73,18 @@ export class DependencyContainer {
   }
 
   /**
-   * Releases all cached instances for a specific scope.
+   * Releases all or a specific cached instances.
    *
-   * @param {string} key - The scope key to free.
+   * @param {string|undefined} key - The scope key to free.
    * @returns {void}
    */
-  public free(key: string) {
-    if (this._scopeMap.has(key)) {
-      this._scopeMap.delete(key);
+  public free(key?: string): void {
+    if(key) {
+      if (this._scopeMap.has(key)) {
+        this._scopeMap.delete(key);
+      }
+    } else {
+      this._scopeMap.clear();
     }
   }
 

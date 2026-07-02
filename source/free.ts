@@ -8,6 +8,6 @@ import { container } from "./mod.ts";
  * @param {string} scope - The name of the key to free.
  * @returns {void}
  */
-export function free(key: string): void {
+export function free(key?: string): void {
   container.free(key);
 }
