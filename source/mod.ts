@@ -6,3 +6,6 @@ export * from "./container.ts";
 export * from "./injectable.ts";
 export * from "./inject.ts";
 export * from "./free.ts";
+
+export * from "./error/MissingFactoryError.ts";
+export * from "./error/MissingScopeError.ts";
