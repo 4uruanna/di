@@ -4,11 +4,11 @@ import {
   type Dependency,
   type Factory,
   type InjectionOptions,
+  MissingFactoryError,
+  MissingScopeError,
   type UnknownDependency,
   type UnknownDependencyFactory,
   type UnknownFactory,
-  MissingFactoryError,
-  MissingScopeError
 } from "./mod.ts";
 
 /**
@@ -45,7 +45,7 @@ export class DependencyContainer {
     constructor: Factory<T>,
     options: InjectionOptions,
   ): Dependency<T> {
-    switch(options.type) {
+    switch (options.type) {
       case "singleton":
         return this._getSingleton(constructor, options);
       case "scope":
@@ -114,7 +114,10 @@ export class DependencyContainer {
    * @throws {MissingFactoryError} If factory is missing.
    * @private
    */
-  private _getSingleton<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+  private _getSingleton<T>(
+    constructor: Factory<T>,
+    options: InjectionOptions,
+  ): Dependency<T> {
     if (this._singletonMap.has(constructor) === false) {
       const factory = this._getFactory(constructor);
       this._singletonMap.set(constructor, factory(...(options.args || [])));
@@ -134,7 +137,10 @@ export class DependencyContainer {
    * @throws {MissingScopeError} If scope is missing for scope-type injection.
    * @private
    */
-  private _getScope<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+  private _getScope<T>(
+    constructor: Factory<T>,
+    options: InjectionOptions,
+  ): Dependency<T> {
     if (options.scope) {
       if (this._scopeMap.has(options.scope) === false) {
         this._scopeMap.set(
@@ -169,7 +175,10 @@ export class DependencyContainer {
    * @throws {MissingFactoryError} If factory is missing.
    * @private
    */
-  private _getTransient<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+  private _getTransient<T>(
+    constructor: Factory<T>,
+    options: InjectionOptions,
+  ): Dependency<T> {
     return this._getFactory(constructor)(...(options.args || []));
   }
 }

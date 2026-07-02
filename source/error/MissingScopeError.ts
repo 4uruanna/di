@@ -1,5 +1,3 @@
-import type { Factory } from "../types.ts";
-
 /**
  * Error thrown when attempting scope-based injection without providing a scope name.
  */
