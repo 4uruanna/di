@@ -1,13 +1,14 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
-import { MissingFactoryError } from "./error/MissingFactoryError.ts";
-import type {
-  Dependency,
-  Factory,
-  InjectionOptions,
-  UnknownDependency,
-  UnknownDependencyFactory,
-  UnknownFactory,
+import {
+  type Dependency,
+  type Factory,
+  type InjectionOptions,
+  type UnknownDependency,
+  type UnknownDependencyFactory,
+  type UnknownFactory,
+  MissingFactoryError,
+  MissingScopeError
 } from "./mod.ts";
 
 /**
@@ -72,8 +73,7 @@ export class DependencyContainer {
 
         return map.get(constructor) as T;
       } else {
-        // THROW MISSING SCOPE ERROR
-        throw new Error();
+        throw new MissingScopeError();
       }
     } else {
       const factory = this._getFactory(constructor);
