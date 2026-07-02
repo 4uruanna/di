@@ -39,45 +39,19 @@ export class DependencyContainer {
    * @param {InjectionOptions} options - The injection options containing type, args, and scope.
    * @returns {Dependency<T>} The resolved dependency instance.
    * @throws {MissingFactoryError} If factory is missing.
-   * @throws {Error} If scope is missing for scope-type injection.
+   * @throws {MissingScopeError} If scope is missing for scope-type injection.
    */
   public get<T>(
     constructor: Factory<T>,
     options: InjectionOptions,
   ): Dependency<T> {
-    if (options.type === "singleton") {
-      if (this._singletonMap.has(constructor) === false) {
-        const factory = this._getFactory(constructor);
-        this._singletonMap.set(constructor, factory(...(options.args || [])));
-      }
-
-      return this._singletonMap.get(constructor) as T;
-    } else if (options.type === "scope") {
-      if (options.scope) {
-        if (this._scopeMap.has(options.scope) === false) {
-          this._scopeMap.set(
-            options.scope,
-            new Map<
-              UnknownFactory,
-              UnknownDependency
-            >(),
-          );
-        }
-
-        const map = this._scopeMap.get(options.scope)!;
-
-        if (map.has(constructor) === false) {
-          const factory = this._getFactory(constructor);
-          map.set(constructor, factory(...(options.args || [])));
-        }
-
-        return map.get(constructor) as T;
-      } else {
-        throw new MissingScopeError();
-      }
-    } else {
-      const factory = this._getFactory(constructor);
-      return factory(...(options.args || []));
+    switch(options.type) {
+      case "singleton":
+        return this._getSingleton(constructor, options);
+      case "scope":
+        return this._getScope(constructor, options);
+      case "transient":
+        return this._getTransient(constructor, options);
     }
   }
 
@@ -128,6 +102,75 @@ export class DependencyContainer {
     } else {
       throw new MissingFactoryError(constructor);
     }
+  }
+
+  /**
+   * Retrieves a "singleton" dependency instance.
+   *
+   * @template T - The dependency type to retrieve.
+   * @param {Factory<T>} factory - The constructor function for the factory.
+   * @param {InjectionOptions} options - The injection options containing args.
+   * @returns {Dependency<T>} The resolved dependency instance.
+   * @throws {MissingFactoryError} If factory is missing.
+   * @private
+   */
+  private _getSingleton<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+    if (this._singletonMap.has(constructor) === false) {
+      const factory = this._getFactory(constructor);
+      this._singletonMap.set(constructor, factory(...(options.args || [])));
+    }
+
+    return this._singletonMap.get(constructor) as Dependency<T>;
+  }
+
+  /**
+   * Retrieves a "scope" dependency instance.
+   *
+   * @template T - The dependency type to retrieve.
+   * @param {Factory<T>} factory - The constructor function for the factory.
+   * @param {InjectionOptions} options - The injection options containing args and scope.
+   * @returns {Dependency<T>} The resolved dependency instance.
+   * @throws {MissingFactoryError} If factory is missing.
+   * @throws {MissingScopeError} If scope is missing for scope-type injection.
+   * @private
+   */
+  private _getScope<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+    if (options.scope) {
+      if (this._scopeMap.has(options.scope) === false) {
+        this._scopeMap.set(
+          options.scope,
+          new Map<
+            UnknownFactory,
+            UnknownDependency
+          >(),
+        );
+      }
+
+      const map = this._scopeMap.get(options.scope)!;
+
+      if (map.has(constructor) === false) {
+        const factory = this._getFactory(constructor);
+        map.set(constructor, factory(...(options.args || [])));
+      }
+
+      return map.get(constructor) as Dependency<T>;
+    } else {
+      throw new MissingScopeError();
+    }
+  }
+
+  /**
+   * Retrieves a "transient" dependency instance.
+   *
+   * @template T - The dependency type to retrieve.
+   * @param {Factory<T>} factory - The constructor function for the factory.
+   * @param {InjectionOptions} options - The injection options containing args.
+   * @returns {Dependency<T>} The resolved dependency instance.
+   * @throws {MissingFactoryError} If factory is missing.
+   * @private
+   */
+  private _getTransient<T>(constructor: Factory<T>, options: InjectionOptions): Dependency<T> {
+    return this._getFactory(constructor)(...(options.args || []));
   }
 }
 
