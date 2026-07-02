@@ -2,6 +2,11 @@
 
 import { container, type Factory, type InjectionOptions } from "./mod.ts";
 
+const DEFAULT_OPTIONS: InjectionOptions = Object.freeze({
+  type: "singleton",
+  args: [],
+});
+
 /**
  * Retrieves or constructs a dependency instance using the global container.
  *
@@ -12,10 +17,7 @@ import { container, type Factory, type InjectionOptions } from "./mod.ts";
  */
 export function inject<T>(
   factory: Factory<T>,
-  options: InjectionOptions = {
-    type: "singleton",
-    args: [],
-  },
+  options: InjectionOptions = DEFAULT_OPTIONS,
 ): T {
   return container.get(factory, options) as T;
 }
