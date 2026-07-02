@@ -1,7 +1,7 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
 import { expect } from "@std/expect";
-import { free, inject, Injectable } from "../source/mod.ts";
+import { free, inject, Injectable, MissingScopeError } from "../source/mod.ts";
 
 @Injectable("oof")
 class FooClass {
@@ -28,4 +28,8 @@ Deno.test("inject scope", () => {
     args: ["bar"],
   });
   expect(bar === another).toBe(false);
+});
+
+Deno.test("inject scope without scope name throws error", () => {
+  expect(() => inject(FooClass, { type: "scope" })).toThrow(MissingScopeError);
 });

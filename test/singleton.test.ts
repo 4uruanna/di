@@ -1,7 +1,7 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
 import { expect } from "@std/expect";
-import { inject, Injectable } from "../source/mod.ts";
+import { inject, Injectable, MissingFactoryError } from "../source/mod.ts";
 import { assertEquals } from "@std/assert/equals";
 
 @Injectable("oof")
@@ -36,6 +36,8 @@ class BazClass {
 class BeeClass {
 }
 
+class PoopClass {}
+
 Deno.test("inject singleton", () => {
   const baz = inject(BazClass);
 
@@ -52,4 +54,8 @@ Deno.test("inject singleton", () => {
   } catch (error) {
     expect(error).toBeInstanceOf(Error);
   }
+});
+
+Deno.test("inject dependency without factory throws error", () => {
+  expect(() => inject(PoopClass)).toThrow(MissingFactoryError);
 });
