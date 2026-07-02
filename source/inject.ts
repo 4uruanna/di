@@ -1,21 +1,38 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
-import { container, type Factory, type InjectionOptions } from "./mod.ts";
+import {
+  type Constructor,
+  DependencyContainer,
+  type DependencyToken,
+  type Mode,
+} from "@4uruanna/di";
 
-/**
- * Retrieves or constructs a dependency instance using the global container.
- *
- * @template T - The dependency type to retrieve.
- * @param {Factory<T>} factory - The constructor function for the dependency.
- * @param {InjectionOptions} options - The injection options (defaults to singleton).
- * @returns {T} The resolved dependency instance.
- */
 export function inject<T>(
-  factory: Factory<T>,
-  options: InjectionOptions = {
-    type: "singleton",
-    args: [],
-  },
+  token: Constructor<T>,
+  mode?: Mode,
+  scope?: string | null,
+): T;
+
+export function inject<T>(
+  token: symbol | string,
+  mode?: Mode,
+  scope?: string | null,
+): T;
+
+export function inject<T>(
+  token: DependencyToken,
+  mode?: Mode,
+  scope?: string | null,
+): T;
+
+export function inject<T>(
+  token: DependencyToken,
+  mode?: Mode,
+  scope?: string | null,
 ): T {
-  return container.get(factory, options) as T;
+  return DependencyContainer.instance.resolve<T>(
+    token,
+    mode,
+    scope,
+  );
 }
