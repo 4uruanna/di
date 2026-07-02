@@ -1,13 +1,11 @@
 # @4uruanna/di
 
-[![JSR](https://jsr.io/badges/@4uruanna/di)](https://jsr.io/@4uruanna/di)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](license)
-[![Deno](https://img.shields.io/badge/Deno->=1.0-000000?style=flat-square&logo=deno)](https://deno.land)
+[![JSR](https://jsr.io/badges/@4uruanna/di?style=flat-square)](https://jsr.io/@4uruanna/di)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](LICENSE)
+[![Deno](https://img.shields.io/badge/Deno->=2.0-000000?style=flat-square&logo=deno)](https://deno.land)
 
 A lightweight, type-safe dependency injection library for Deno and TypeScript
 with zero non-standard dependency.
-
-[Usage](#usage)
 
 ## Usage
 
