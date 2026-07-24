@@ -4,39 +4,52 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)](LICENSE)
 [![Deno](https://img.shields.io/badge/Deno->=2.0-000000?style=flat-square&logo=deno)](https://deno.land)
 
-A lightweight, type-safe dependency injection library for Deno and TypeScript
-with zero non-standard dependency.
+Lightweight Dependency Injection library for Deno with zero non-standard
+dependency.
 
 ## Usage
 
 ### Basic Setup
 
-Register your classes with the `@Injectable()` decorator and use `inject()` to
-retrieve them:
+Register your classes, primitives and functions with the `@Injectable` decorator
+or `DependencyContainer.instance.register` and use `inject()` to retrieve them:
 
 ```typescript
-import { inject, Injectable } from "@jackofblades/di";
+import { inject, Injectable } from "@4uruanna/di";
 
-@Injectable()
+@Injectable
 class DatabaseService {
   connect() {
     return "Connected to database";
   }
 }
 
-@Injectable()
+@Injectable
 class UserService {
   private db = inject(DatabaseService);
 
   getUsers() {
-    return this.db.connect();
+    return [
+      { id: 1, name: "foo" },
+    ];
   }
 }
+
+Dependency.instance.register("URL", "https://www.google.com/");
+
+Dependency.instance.register("CB", () => 1);
 
 // Use it
 
 const userService = inject(UserService);
-console.log(userService.getUsers()); // "Connected to database"
+const url: string = inject("URL");
+const callback: () => number = inject("CB");
+
+console.log(
+  userService.getUsers(), // [{ id: 1, name: "foo" }]
+  url, // "https://www.google.com/"
+  callback(), // 1
+);
 ```
 
 ### Injection Types
@@ -48,7 +61,7 @@ This library supports three dependency lifetime types:
 Same instance is returned for all injection requests:
 
 ```typescript
-@Injectable()
+@Injectable
 class SingletonService {
   id = Math.random();
 }
@@ -64,13 +77,13 @@ console.log(instance1 === instance2); // true
 New instance is created for each injection request:
 
 ```typescript
-@Injectable()
+@Injectable
 class TransientService {
   id = Math.random();
 }
 
-const instance1 = inject(TransientService, { type: "transient" });
-const instance2 = inject(TransientService, { type: "transient" });
+const instance1 = inject(TransientService, "transient");
+const instance2 = inject(TransientService, "transient");
 
 console.log(instance1 === instance2); // false
 ```
@@ -80,41 +93,22 @@ console.log(instance1 === instance2); // false
 Same instance within a named scope, different instances across scopes:
 
 ```typescript
-import { free, inject, Injectable } from "@jackofblades/di";
+import { DependencyContainer, inject, Injectable } from "@jackofblades/di";
 
-@Injectable()
+@Injectable
 class ScopedService {
   id = Math.random();
 }
 
 // Create instances in different scopes
-const user1 = inject(ScopedService, { type: "scope", scope: "user-1" });
-const user2 = inject(ScopedService, { type: "scope", scope: "user-2" });
-const user1Again = inject(ScopedService, { type: "scope", scope: "user-1" });
+const user1 = inject(ScopedService, "scoped", "1");
+const user2 = inject(ScopedService, "scoped", "2");
+const user1Again = inject(ScopedService, "scoped", "1");
 
 console.log(user1 === user1Again); // true - same scope
 console.log(user1 === user2); // false - different scopes
 
 // Free a scope to release all its dependencies
-free("user-1");
-free("user-2");
-```
-
-### Constructor Arguments
-
-Pass arguments to your dependencies at registration or injection time:
-
-```typescript
-@Injectable("global-arg")
-class ConfigurableService {
-  constructor(
-    public globalArg: string,
-    public optionalArg: string | null = null,
-  ) {}
-}
-
-const service = inject(ConfigurableService, {
-  type: "transient",
-  args: ["optional-arg"],
-});
+DependencyContainer.instance.disposeScope("user-1");
+DependencyContainer.instance.disposeScope("user-2");
 ```
