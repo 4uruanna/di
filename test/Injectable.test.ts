@@ -2,7 +2,7 @@
 
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { DependencyContainer } from "../source/DependencyContainer.ts";
-import { Injectable } from "../source/Injectable.ts";
+import { Injectable } from "../source/decorator/injectable.ts";
 import { inject } from "../source/inject.ts";
 
 Deno.test("Inject and Retrieve", () => {

@@ -1,18 +1,18 @@
 // Copyright 2026 Villalonga Software. All rights reserved. Apache-2.0 license.
 
-import { TokenNotFoundError } from "./error/TokenNotFoundError.ts";
-import { UndefinedScopeError } from "./error/UndefinedScopeError.ts";
-import type {
-  Constructor,
-  DependencyFactory,
-  DependencyToken,
-  Mode,
-} from "./types.ts";
+import {
+  type Constructor,
+  type DependencyFactory,
+  type DependencyToken,
+  type Mode,
+  TokenNotFoundError,
+  UndefinedScopeError,
+} from "@4uruanna/di";
 
 export class DependencyContainer {
   private static _instance: DependencyContainer | null = null;
 
-  public static get instance() {
+  public static get instance(): DependencyContainer {
     if (this._instance === null) {
       this._instance = new DependencyContainer();
     }
