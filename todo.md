@@ -1,1 +1,0 @@
-- [ ] Détection des **dépendances circulaires**
